@@ -1,7 +1,23 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useThemeStore } from "@/lib/store";
+
+function ThemeSync() {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    // Sync theme with DOM on mount and when theme changes
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  return null;
+}
 
 export default function Providers({ children }) {
   const [queryClient] = useState(
@@ -18,6 +34,9 @@ export default function Providers({ children }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeSync />
+      {children}
+    </QueryClientProvider>
   );
 }
