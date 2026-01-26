@@ -11,9 +11,17 @@ const apiClient = axios.create({
 });
 
 // Request interceptor - add token to requests
+import { useAuthStore } from "./store";
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    // Read token from Zustand store (persisted)
+    let token;
+    try {
+      // If running in a React component, use the hook
+      token = useAuthStore.getState().token;
+    } catch {
+      token = undefined;
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,7 +29,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor - handle errors
@@ -30,14 +38,16 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // Clear Zustand auth state
       if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
+        import("./store").then(({ useAuthStore }) => {
+          useAuthStore.getState().logout();
+          window.location.href = "/auth/login";
+        });
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API
