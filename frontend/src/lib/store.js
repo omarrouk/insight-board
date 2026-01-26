@@ -1,4 +1,8 @@
-export const useAuthStore = create(
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { userAPI } from "./api";
+
   persist(
     (set, get) => ({
       user: null,
@@ -7,6 +11,10 @@ export const useAuthStore = create(
 
       setAuth: async (user, token) => {
         set({ user, token, isAuthenticated: true });
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+        }
         // Fetch favorites from backend after login
         try {
           const response = await userAPI.getFavorites();
@@ -19,6 +27,10 @@ export const useAuthStore = create(
 
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
         // Clear favorites on logout
         useNewsStore.getState().setFavorites([]);
       },
@@ -27,6 +39,9 @@ export const useAuthStore = create(
         const currentUser = get().user;
         const updatedUser = { ...currentUser, ...userData };
         set({ user: updatedUser });
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        }
       },
     }),
     {
