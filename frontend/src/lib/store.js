@@ -1,10 +1,4 @@
-
-
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { userAPI } from "./api";
-import { useEffect, useState } from "react";
-
+export const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
