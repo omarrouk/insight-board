@@ -67,7 +67,7 @@ export default function LoginPage() {
 
       if (response.data.status === "success") {
         const { user, token } = response.data.data;
-        setAuth(user, token);
+        await setAuth(user, token); // Now async, fetches favorites
         toast.success("Login successful! Welcome back.");
         router.push("/dashboard");
       }
