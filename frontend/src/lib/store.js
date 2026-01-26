@@ -35,13 +35,13 @@ export const useAuthStore = create(
     }),
     {
       name: "auth-storage",
-    }
-  )
+    },
+  ),
 );
 
 export const useThemeStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       theme: "light",
       toggleTheme: () =>
         set((state) => {
@@ -52,15 +52,42 @@ export const useThemeStore = create(
             } else {
               document.documentElement.classList.remove("dark");
             }
+            localStorage.setItem(
+              "theme-storage",
+              JSON.stringify({ state: { theme: newTheme } }),
+            );
           }
           return { theme: newTheme };
         }),
-      setTheme: (theme) => set({ theme }),
+      setTheme: (theme) => {
+        set({ theme });
+        if (typeof window !== "undefined") {
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+          localStorage.setItem(
+            "theme-storage",
+            JSON.stringify({ state: { theme } }),
+          );
+        }
+      },
     }),
     {
       name: "theme-storage",
-    }
-  )
+      onRehydrateStorage: () => (state) => {
+        if (typeof window !== "undefined") {
+          const theme = state?.theme || "light";
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        }
+      },
+    },
+  ),
 );
 
 export const useNewsStore = create((set) => ({

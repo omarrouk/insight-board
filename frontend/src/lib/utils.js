@@ -1,3 +1,25 @@
+/**
+ * Remove near-duplicate articles based on normalized title similarity
+ * Keeps the first occurrence of each unique (normalized) title
+ * Optionally, you can enhance with fuzzy matching or URL comparison
+ * @param {Array} articles - Array of article objects (must have 'title')
+ * @returns {Array} Deduplicated articles
+ */
+export const deduplicateArticles = (articles) => {
+  const seen = new Set();
+  const normalize = (str) =>
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  return articles.filter((article) => {
+    const normTitle = normalize(article.title || "");
+    if (seen.has(normTitle)) return false;
+    seen.add(normTitle);
+    return true;
+  });
+};
 import { formatDistanceToNow } from "date-fns";
 
 /**
